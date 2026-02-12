@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mlops-config
+  namespace: mlops
+  labels:
+    app.kubernetes.io/name: mlops-config
+    app.kubernetes.io/part-of: mlops-pipeline
+data:
+  # AWS Settings
+  AWS_REGION: "ap-northeast-1"
+  # S3 Paths (bucket name will be set via Makefile from terraform output)
+  S3_BUCKET: "PLACEHOLDER_BUCKET_NAME"
+  S3_RAW_PATH: "raw/data.csv"
+  S3_PROCESSED_PATH: "processed/data_processed.csv"
+  S3_MODELS_PATH: "models/"
+  S3_ANALYTICS_PATH: "analytics/"
+  # Sentiment Analysis Paths
+  S3_REVIEWS_PATH: "raw/reviews.csv"
+  S3_SENTIMENT_PATH: "analytics/sentiment_results.json"
+  # Processing Settings
+  SCALER_TYPE: "standard"
+  MODEL_TYPE: "random_forest"
+  # Analytics Adapter (duckdb or snowflake)
+  ANALYTICS_ADAPTER: "duckdb"
+  # Snowflake Settings (only used if ANALYTICS_ADAPTER=snowflake)
+  # SNOWFLAKE_PASSWORD is provided via Secret
+  SNOWFLAKE_ACCOUNT: ""
+  SNOWFLAKE_USER: ""
+  SNOWFLAKE_WAREHOUSE: "ANALYTICS_WH"
+  SNOWFLAKE_DATABASE: "MLOPS_ANALYTICS"
+  SNOWFLAKE_SCHEMA: "PUBLIC"
