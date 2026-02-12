@@ -1,0 +1,70 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+
+patches:
+  # Frontend: 2 replicas
+  # NOTE: NEXT_PUBLIC_API_URL uses internal service URL (base default)
+  #       because Next.js API routes run server-side inside k8s cluster
+  - target:
+      kind: Deployment
+      name: app-frontend
+    patch: |
+      - op: replace
+        path: /spec/replicas
+        value: 2
+
+  # Backend: 2 replicas, production settings
+  - target:
+      kind: Deployment
+      name: app-backend
+    patch: |
+      - op: replace
+        path: /spec/replicas
+        value: 2
+      - op: replace
+        path: /spec/template/spec/containers/0/env/2/value
+        value: "https://app.tk-k8s.com"
+      - op: replace
+        path: /spec/template/spec/containers/0/env/6/value
+        value: "postgres"
+
+  # Frontend Service: NodePort 30000
+  - target:
+      kind: Service
+      name: app-frontend-service
+    patch: |
+      - op: replace
+        path: /spec/type
+        value: NodePort
+      - op: add
+        path: /spec/ports/0/nodePort
+        value: 30000
+
+  # Backend Service: NodePort 30080
+  - target:
+      kind: Service
+      name: app-backend-service
+    patch: |
+      - op: replace
+        path: /spec/type
+        value: NodePort
+      - op: add
+        path: /spec/ports/0/nodePort
+        value: 30080
+
+images:
+  - name: public.ecr.aws/s0n1j8n3/app-frontend
+    newName: <AWS_ACCOUNT_ID>.dkr.ecr.ap-northeast-1.amazonaws.com/app-frontend
+    newTag: debug-v1
+  - name: public.ecr.aws/s0n1j8n3/app-backend
+    newName: <AWS_ACCOUNT_ID>.dkr.ecr.ap-northeast-1.amazonaws.com/app-backend
+    newTag: latest
+
+configMapGenerator:
+  - name: app-prod-config
+    namespace: app
+    literals:
+      - ENVIRONMENT=prod

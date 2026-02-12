@@ -1,0 +1,220 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-rules
+  namespace: monitoring
+data:
+  recording-rules.yml: |
+    groups:
+      # ===========================================
+      # HTTP Recording Rules
+      # ===========================================
+      - name: http-recording
+        interval: 30s
+        rules:
+          # HTTP requests per second (5m rate)
+          - record: http_requests:rate5m
+            expr: rate(http_requests_total[5m])
+
+          # HTTP errors per second (5m rate)
+          - record: http_errors:rate5m
+            expr: rate(http_errors_total[5m])
+
+          # HTTP error rate percentage
+          - record: http_error_rate:ratio5m
+            expr: |
+              sum(rate(http_errors_total[5m]))
+              / sum(rate(http_requests_total[5m]))
+
+      # ===========================================
+      # Pod CPU Recording Rules
+      # ===========================================
+      - name: pod-cpu-recording
+        interval: 30s
+        rules:
+          # Pod CPU usage (5m rate)
+          - record: pod:cpu:usage_rate5m
+            expr: |
+              sum(rate(container_cpu_usage_seconds_total{container!=""}[5m])) by (namespace, pod)
+
+          # Pod CPU usage percentage of limit
+          - record: pod:cpu:usage_percent
+            expr: |
+              sum(rate(container_cpu_usage_seconds_total{container!=""}[5m])) by (namespace, pod)
+              / sum(kube_pod_container_resource_limits{resource="cpu"}) by (namespace, pod) * 100
+
+          # Namespace CPU usage
+          - record: namespace:cpu:usage_rate5m
+            expr: |
+              sum(rate(container_cpu_usage_seconds_total{container!=""}[5m])) by (namespace)
+
+      # ===========================================
+      # Pod Memory Recording Rules
+      # ===========================================
+      - name: pod-memory-recording
+        interval: 30s
+        rules:
+          # Pod memory usage
+          - record: pod:memory:usage_bytes
+            expr: |
+              sum(container_memory_working_set_bytes{container!=""}) by (namespace, pod)
+
+          # Pod memory usage percentage of limit
+          - record: pod:memory:usage_percent
+            expr: |
+              sum(container_memory_working_set_bytes{container!=""}) by (namespace, pod)
+              / sum(kube_pod_container_resource_limits{resource="memory"}) by (namespace, pod) * 100
+
+          # Namespace memory usage
+          - record: namespace:memory:usage_bytes
+            expr: |
+              sum(container_memory_working_set_bytes{container!=""}) by (namespace)
+
+      # ===========================================
+      # App Backend Recording Rules
+      # ===========================================
+      - name: app-backend-recording
+        interval: 30s
+        rules:
+          # App uptime
+          - record: app_backend:uptime_seconds
+            expr: process_uptime_seconds{job="app-backend"}
+
+          # App memory usage
+          - record: app_backend:heap_used_bytes
+            expr: nodejs_heap_used_bytes{job="app-backend"}
+
+          # App request rate
+          - record: app_backend:requests_per_second
+            expr: rate(http_requests_total{job="app-backend"}[5m])
+
+  alert-rules.yml: |
+    groups:
+      # ===========================================
+      # Pod アラート
+      # ===========================================
+      - name: pod-alerts
+        rules:
+          # PodCrashLoopBackOff - Pod再起動ループ
+          - alert: PodCrashLoopBackOff
+            expr: |
+              increase(kube_pod_container_status_restarts_total[15m]) > 3
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Pod {{ $labels.namespace }}/{{ $labels.pod }} is crash looping"
+              description: "Pod {{ $labels.namespace }}/{{ $labels.pod }} has restarted {{ $value }} times in the last 15 minutes"
+
+          # PodNotReady - Pod起動失敗
+          - alert: PodNotReady
+            expr: |
+              kube_pod_status_phase{phase=~"Pending|Unknown"} == 1
+            for: 10m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Pod {{ $labels.namespace }}/{{ $labels.pod }} is not ready"
+              description: "Pod {{ $labels.namespace }}/{{ $labels.pod }} has been in {{ $labels.phase }} state for more than 10 minutes"
+
+          # ContainerOOMKilled - メモリ不足で強制終了
+          - alert: ContainerOOMKilled
+            expr: |
+              kube_pod_container_status_last_terminated_reason{reason="OOMKilled"} == 1
+            for: 0m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Container {{ $labels.container }} OOM killed"
+              description: "Container {{ $labels.container }} in pod {{ $labels.namespace }}/{{ $labels.pod }} was OOM killed"
+
+      # ===========================================
+      # リソースアラート
+      # ===========================================
+      - name: resource-alerts
+        rules:
+          # High CPU Usage (コンテナ)
+          - alert: HighCPUUsage
+            expr: |
+              sum(rate(container_cpu_usage_seconds_total{container!=""}[5m])) by (namespace, pod, container)
+              / sum(kube_pod_container_resource_limits{resource="cpu"}) by (namespace, pod, container) > 0.8
+            for: 10m
+            labels:
+              severity: warning
+            annotations:
+              summary: "High CPU usage detected"
+              description: "Container {{ $labels.container }} in {{ $labels.namespace }}/{{ $labels.pod }} is using more than 80% of CPU limit"
+
+          # High Memory Usage (コンテナ)
+          - alert: HighMemoryUsage
+            expr: |
+              sum(container_memory_working_set_bytes{container!=""}) by (namespace, pod, container)
+              / sum(kube_pod_container_resource_limits{resource="memory"}) by (namespace, pod, container) > 0.8
+            for: 10m
+            labels:
+              severity: warning
+            annotations:
+              summary: "High memory usage detected"
+              description: "Container {{ $labels.container }} in {{ $labels.namespace }}/{{ $labels.pod }} is using more than 80% of memory limit"
+
+      # ===========================================
+      # アプリケーションアラート
+      # ===========================================
+      - name: app-alerts
+        rules:
+          # High Error Rate (5xx)
+          - alert: HighErrorRate
+            expr: |
+              sum(rate(http_errors_total[5m])) by (job)
+              / sum(rate(http_requests_total[5m])) by (job) > 0.05
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: "High error rate on {{ $labels.job }}"
+              description: "Error rate is above 5% for {{ $labels.job }}"
+
+          # App Backend Down
+          - alert: AppBackendDown
+            expr: |
+              up{job="app-backend"} == 0
+            for: 2m
+            labels:
+              severity: critical
+            annotations:
+              summary: "App Backend is down"
+              description: "App Backend has been down for more than 2 minutes"
+
+          # High Request Latency (if histogram available)
+          - alert: HighRequestLatency
+            expr: |
+              histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, job)) > 1
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "High request latency on {{ $labels.job }}"
+              description: "95th percentile latency is above 1 second for {{ $labels.job }}"
+
+      # ===========================================
+      # Prometheus 自己監視
+      # ===========================================
+      - name: prometheus-alerts
+        rules:
+          - alert: PrometheusConfigReloadFailed
+            expr: prometheus_config_last_reload_successful == 0
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Prometheus config reload failed"
+              description: "Prometheus failed to reload its configuration"
+
+          - alert: PrometheusTargetDown
+            expr: up == 0
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Prometheus target {{ $labels.job }} is down"
+              description: "Target {{ $labels.instance }} of job {{ $labels.job }} has been down for more than 5 minutes"

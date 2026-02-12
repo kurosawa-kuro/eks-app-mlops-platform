@@ -1,0 +1,39 @@
+apiVersion: karpenter.k8s.aws/v1
+kind: EC2NodeClass
+metadata:
+  name: gpu
+spec:
+  # NOTE:
+  # Karpenter v1 では alias を使用して最新の EKS optimized AMI を取得。
+  # GPUインスタンス（g5, g6）の場合、Karpenter が自動的にGPU AMIを選択。
+  # サポート family: al2, al2023, bottlerocket, windows2019, windows2022
+  amiSelectorTerms:
+    - alias: al2@latest
+
+  subnetSelectorTerms:
+    - tags:
+        kubernetes.io/role/internal-elb: "1"
+
+  securityGroupSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: prod-eks-cluster
+
+  # Terraform output: karpenter_node_role_name
+  # 例: KarpenterNodeRole-prod-eks-cluster
+  role: KarpenterNodeRole-prod-eks-cluster
+
+  blockDeviceMappings:
+    - deviceName: /dev/xvda
+      ebs:
+        volumeSize: 200Gi
+        volumeType: gp3
+        encrypted: true
+        # デフォルトの AWS 管理 EBS キーを使用
+        deleteOnTermination: true
+
+  tags:
+    Environment: production
+    Project: prod-eks-cluster
+    ManagedBy: Karpenter
+    karpenter.sh/discovery: prod-eks-cluster
+

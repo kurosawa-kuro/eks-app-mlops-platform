@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cnpg-database
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: git@github.com:kurosawa-kuro/eks-app-mlops-platform.git
+    targetRevision: HEAD
+    path: infra/k8s/cnpg/overlays/local
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: database
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

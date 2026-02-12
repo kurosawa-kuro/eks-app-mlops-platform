@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llm-inference
+  namespace: llm
+  labels:
+    app: llm-inference
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: llm-inference
+  template:
+    metadata:
+      labels:
+        app: llm-inference
+    spec:
+      # GPU NodePool運用前提: GPU用 taint を許容
+      tolerations:
+        - key: "nvidia.com/gpu"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
+      containers:
+        - name: vllm
+          # Production: use stable version
+          image: vllm/vllm-openai:v0.6.4
+          imagePullPolicy: IfNotPresent
+          args:
+            - "--model"
+            - "$(LLM_MODEL_ID)"
+            - "--host"
+            - "0.0.0.0"
+            - "--port"
+            - "8000"
+            - "--dtype"
+            - "auto"
+            - "--gpu-memory-utilization"
+            - "0.90"
+          envFrom:
+            - configMapRef:
+                name: llm-config
+          ports:
+            - containerPort: 8000
+          resources:
+            limits:
+              nvidia.com/gpu: "1"
+              cpu: "4000m"
+              memory: "24Gi"
+            requests:
+              nvidia.com/gpu: "1"
+              cpu: "2000m"
+              memory: "12Gi"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 120
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 180
+            periodSeconds: 20
+

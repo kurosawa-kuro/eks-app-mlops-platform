@@ -1,0 +1,44 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: cnpg-database
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          # - env: staging
+          #   cluster: https://eks-staging.example.com
+          #   namespace: database
+          - env: prod
+            cluster: https://kubernetes.default.svc
+            namespace: database
+  template:
+    metadata:
+      name: 'cnpg-database-{{env}}'
+      namespace: argocd
+    spec:
+      project: default
+      source:
+        repoURL: git@github.com:kurosawa-kuro/eks-app-mlops-platform.git
+        targetRevision: HEAD
+        path: 'infra/k8s/cnpg/overlays/{{env}}'
+      destination:
+        server: '{{cluster}}'
+        namespace: '{{namespace}}'
+      ignoreDifferences:
+        - group: postgresql.cnpg.io
+          kind: Cluster
+          jsonPointers:
+            - /spec/imageName
+            - /spec/postgresGID
+            - /spec/postgresUID
+            - /status
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - RespectIgnoreDifferences=true
+          - ServerSideApply=true

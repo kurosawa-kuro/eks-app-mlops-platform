@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-backend-service
+  namespace: app
+  labels:
+    app.kubernetes.io/name: app-backend
+    app.kubernetes.io/component: backend
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8000"
+    prometheus.io/path: "/metrics"
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: app-backend
+  ports:
+    - port: 8000
+      targetPort: 8000
+      protocol: TCP
+      name: http

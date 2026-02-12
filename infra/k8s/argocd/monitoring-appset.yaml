@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: monitoring-stack
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          # - env: staging
+          #   cluster: https://eks-staging.example.com
+          #   namespace: monitoring
+          - env: prod
+            cluster: https://kubernetes.default.svc
+            namespace: monitoring
+  template:
+    metadata:
+      name: 'monitoring-stack-{{env}}'
+      namespace: argocd
+    spec:
+      project: default
+      source:
+        repoURL: git@github.com:kurosawa-kuro/eks-app-mlops-platform.git
+        targetRevision: HEAD
+        path: 'infra/k8s/monitoring/overlays/{{env}}'
+      destination:
+        server: '{{cluster}}'
+        namespace: '{{namespace}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

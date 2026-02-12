@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: monolith-service
+  namespace: monolith
+spec:
+  type: ClusterIP
+  selector:
+    app: monolith
+  ports:
+    - port: 8000
+      targetPort: 8000
