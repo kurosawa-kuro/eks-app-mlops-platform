@@ -1,0 +1,113 @@
+// App Prisma Schema
+// https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["app"]
+}
+
+// =============================================================================
+// User Model
+// =============================================================================
+
+/// User - ユーザー (パスワードなし、JWT認証)
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  role      String   @default("user") // "user" | "admin"
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+  @@schema("app")
+}
+
+// =============================================================================
+// Shop Models
+// =============================================================================
+
+/// Product - 商品マスタ
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  price       Int
+  description String?
+  imageUrl    String?  @map("image_url")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+
+  @@map("products")
+  @@schema("app")
+}
+
+/// CartItem - カートアイテム
+model CartItem {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  productId String   @map("product_id")
+  qty       Int      @default(1)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  product Product @relation(fields: [productId], references: [id])
+
+  @@unique([userId, productId])
+  @@map("cart_items")
+  @@schema("app")
+}
+
+/// Order - 注文
+model Order {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  total     Int
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  items OrderItem[]
+
+  @@map("orders")
+  @@schema("app")
+}
+
+/// OrderItem - 注文明細（購入時点の商品情報を非正規化）
+model OrderItem {
+  id          String @id @default(cuid())
+  orderId     String @map("order_id")
+  productId   String @map("product_id")
+  productName String @map("product_name")
+  price       Int
+  qty         Int
+
+  // Relations
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+  @@schema("app")
+}
+
+/// AuditLog - 監査ログ
+model AuditLog {
+  id     String   @id @default(cuid())
+  ts     DateTime @default(now())
+  userId String   @map("user_id")
+  action String
+  detail Json?
+
+  @@index([userId])
+  @@index([ts])
+  @@map("audit_logs")
+  @@schema("app")
+}

@@ -1,0 +1,135 @@
+<% locals.breadcrumb = `<a href="/">Home</a> / <span>DevTool</span>` %>
+
+<div class="page-header">
+  <h1>Developer Tools</h1>
+  <p>API Health & Database Diagnostics</p>
+</div>
+
+<section>
+  <h2 class="section-title">API Health</h2>
+  <div class="card-grid">
+    <div class="card">
+      <h3 style="display: flex; align-items: center; gap: 0.75rem;">
+        Server Status
+        <span id="health-status" class="status-badge status-loading">checking...</span>
+      </h3>
+      <p>サーバー状態とデータベース接続を確認できます。</p>
+      <div style="display: flex; gap: 0.5rem;">
+        <a href="/health" role="button" class="outline">Health API</a>
+        <button id="btn-refresh-health" class="secondary">Refresh</button>
+      </div>
+    </div>
+  </div>
+  <div id="health-result" class="result-box" style="display: none;">
+    <pre id="health-json" style="margin: 0; white-space: pre-wrap; font-size: 0.85rem;"></pre>
+  </div>
+</section>
+
+<section>
+  <h2 class="section-title">Database Connection</h2>
+  <div class="card-grid">
+    <div class="card">
+      <h3 style="display: flex; align-items: center; gap: 0.75rem;">
+        PostgreSQL
+        <span id="postgres-status" class="status-badge status-loading">not tested</span>
+      </h3>
+      <p>Neon Database (app)</p>
+      <div>
+        <button id="btn-postgres" class="outline">Test Connection</button>
+      </div>
+    </div>
+  </div>
+  <div id="postgres-result" class="result-box" style="display: none;">
+    <span id="postgres-result-text"></span>
+  </div>
+</section>
+
+<section>
+  <h2 class="section-title">Metrics</h2>
+  <div class="card-grid">
+    <div class="card">
+      <h3>Prometheus Metrics</h3>
+      <p>アプリケーションメトリクス（リクエスト数、レイテンシなど）</p>
+      <div>
+        <a href="/metrics" role="button" class="outline">View Metrics</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<% locals.scripts = `
+<script>
+  async function checkHealth() {
+    const statusEl = document.getElementById('health-status');
+    const resultEl = document.getElementById('health-result');
+    const jsonEl = document.getElementById('health-json');
+
+    statusEl.textContent = 'checking...';
+    statusEl.className = 'status-badge status-loading';
+
+    try {
+      const res = await fetch('/health');
+      const data = await res.json();
+
+      if (data.status === 'ok') {
+        statusEl.textContent = 'Healthy';
+        statusEl.className = 'status-badge status-ok';
+        resultEl.style.display = 'block';
+        resultEl.className = 'result-box result-success';
+      } else {
+        statusEl.textContent = 'Unhealthy';
+        statusEl.className = 'status-badge status-error';
+        resultEl.style.display = 'block';
+        resultEl.className = 'result-box result-error';
+      }
+      jsonEl.textContent = JSON.stringify(data, null, 2);
+    } catch (error) {
+      statusEl.textContent = 'Error';
+      statusEl.className = 'status-badge status-error';
+      resultEl.style.display = 'block';
+      resultEl.className = 'result-box result-error';
+      jsonEl.textContent = 'Error: ' + error.message;
+    }
+  }
+
+  async function testPostgres() {
+    const statusEl = document.getElementById('postgres-status');
+    const resultEl = document.getElementById('postgres-result');
+    const resultText = document.getElementById('postgres-result-text');
+
+    statusEl.textContent = 'testing...';
+    statusEl.className = 'status-badge status-loading';
+    resultEl.style.display = 'block';
+    resultEl.className = 'result-box';
+    resultText.textContent = 'PostgreSQL に接続中...';
+
+    try {
+      const res = await fetch('/health/postgres', { method: 'POST' });
+      const data = await res.json();
+
+      if (data.success) {
+        statusEl.textContent = 'Connected';
+        statusEl.className = 'status-badge status-ok';
+        resultEl.classList.add('result-success');
+        resultText.textContent = '✓ ' + data.message;
+      } else {
+        statusEl.textContent = 'Failed';
+        statusEl.className = 'status-badge status-error';
+        resultEl.classList.add('result-error');
+        resultText.textContent = '✗ ' + data.message;
+      }
+    } catch (error) {
+      statusEl.textContent = 'Error';
+      statusEl.className = 'status-badge status-error';
+      resultEl.classList.add('result-error');
+      resultText.textContent = '✗ Error: ' + error.message;
+    }
+  }
+
+  document.getElementById('btn-refresh-health').addEventListener('click', checkHealth);
+  document.getElementById('btn-postgres').addEventListener('click', testPostgres);
+
+  // Initial health check
+  checkHealth();
+</script>
+` %>
