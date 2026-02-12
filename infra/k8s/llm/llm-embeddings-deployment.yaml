@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llm-embeddings
+  namespace: llm
+  labels:
+    app: llm-embeddings
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: llm-embeddings
+  template:
+    metadata:
+      labels:
+        app: llm-embeddings
+    spec:
+      tolerations:
+        - key: "nvidia.com/gpu"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
+      containers:
+        - name: tei
+          # NOTE: pin to a version for production
+          image: ghcr.io/huggingface/text-embeddings-inference:latest
+          imagePullPolicy: Always
+          args:
+            - "--model-id"
+            - "$(EMBEDDING_MODEL_ID)"
+            - "--port"
+            - "8001"
+          envFrom:
+            - configMapRef:
+                name: llm-config
+          ports:
+            - containerPort: 8001
+          resources:
+            # TEI can run on CPU, but GPU is faster; keep GPU request optional by adjusting later.
+            limits:
+              nvidia.com/gpu: "1"
+              cpu: "2000m"
+              memory: "8Gi"
+            requests:
+              nvidia.com/gpu: "1"
+              cpu: "500m"
+              memory: "2Gi"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8001
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8001
+            initialDelaySeconds: 40
+            periodSeconds: 20
+

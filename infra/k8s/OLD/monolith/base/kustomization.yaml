@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  # Namespaces
+  - namespace-monolith.yaml
+  - namespace-mlops.yaml
+  - namespace-monitoring.yaml
+  # App
+  - serviceaccount.yaml
+  - deployment.yaml
+  - service.yaml

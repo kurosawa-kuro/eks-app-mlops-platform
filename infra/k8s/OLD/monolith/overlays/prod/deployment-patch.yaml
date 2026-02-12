@@ -1,0 +1,18 @@
+# ===========================================
+# Deployment Patch: Use ConfigMap and Secret for env vars
+# ===========================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: monolith
+  namespace: monolith
+spec:
+  template:
+    spec:
+      containers:
+        - name: monolith
+          envFrom:
+            - configMapRef:
+                name: monolith-config
+            - secretRef:
+                name: monolith-secret

@@ -1,0 +1,25 @@
+# ===========================================
+# ConfigMap: Non-sensitive environment variables
+# ===========================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: monolith-config
+  namespace: monolith
+data:
+  PORT: "8000"
+  NODE_ENV: "production"
+  JWT_EXPIRY_SECONDS: "3600"
+  LOG_MODE: "firehose"
+  FIREHOSE_STREAM_NAME: "monolith-log-stream"
+  AWS_REGION: "ap-northeast-1"
+  ERROR_LOG_GROUP: "/k8s-ml-platform/prod/app-errors"
+  ENABLE_ANALYTICS_API: "true"
+  ANALYTICS_S3_BUCKET: "k8s-ml-platform-prod-data-<AWS_ACCOUNT_ID>"
+  # LLM API Configuration
+  ENABLE_LLM_API: "true"
+  LLM_INFERENCE_URL: "http://llm-inference.llm.svc.cluster.local:8000"
+  LLM_EMBEDDINGS_URL: "http://llm-embeddings.llm.svc.cluster.local:8001"
+  # EC Shop Configuration
+  ECSHOP_STORAGE_MODE: "memory"
+  ECSHOP_AUTH_MODE: "simple"

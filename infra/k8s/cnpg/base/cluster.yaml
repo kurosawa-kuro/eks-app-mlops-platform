@@ -1,0 +1,95 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: app-postgres
+  namespace: database
+  labels:
+    app.kubernetes.io/name: app-postgres
+    app.kubernetes.io/component: database
+    app.kubernetes.io/part-of: eks-app-mlops-platform
+spec:
+  # PostgreSQL instances (1 primary + 2 replicas for HA)
+  instances: 3
+
+  # PostgreSQL version
+  imageName: ghcr.io/cloudnative-pg/postgresql:16.4
+
+  # Primary update strategy
+  primaryUpdateStrategy: unsupervised
+
+  # Storage configuration
+  storage:
+    size: 10Gi
+    storageClass: gp2  # EKS default (gp3 requires EBS CSI driver)
+
+  # Superuser Secret (for admin access)
+  superuserSecret:
+    name: pg-superuser
+
+  # PostgreSQL configuration
+  postgresql:
+    parameters:
+      # Performance tuning
+      shared_buffers: "256MB"
+      effective_cache_size: "768MB"
+      maintenance_work_mem: "64MB"
+      checkpoint_completion_target: "0.9"
+      wal_buffers: "16MB"
+      default_statistics_target: "100"
+      random_page_cost: "1.1"
+      effective_io_concurrency: "200"
+      work_mem: "4MB"
+      huge_pages: "off"
+      min_wal_size: "1GB"
+      max_wal_size: "4GB"
+      max_worker_processes: "4"
+      max_parallel_workers_per_gather: "2"
+      max_parallel_workers: "4"
+      max_parallel_maintenance_workers: "2"
+      # Logging
+      log_statement: "ddl"
+      log_min_duration_statement: "1000"  # Log queries > 1s
+    pg_hba:
+      - host all all 10.0.0.0/8 md5
+      - host all all 172.16.0.0/12 md5
+      - host all all 192.168.0.0/16 md5
+
+  # Bootstrap configuration
+  bootstrap:
+    initdb:
+      database: appdb
+      owner: appuser
+      secret:
+        name: pg-app-user
+      postInitSQL:
+        - CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+        - CREATE EXTENSION IF NOT EXISTS "pg_stat_statements";
+
+  # Backup configuration (S3)
+  backup:
+    barmanObjectStore:
+      destinationPath: s3://k8s-ml-platform-prod-data-backup/cnpg/
+      s3Credentials:
+        inheritFromIAMRole: true
+      wal:
+        compression: gzip
+        maxParallel: 2
+    retentionPolicy: "30d"
+
+  # Resource limits
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+
+  # Affinity for spreading across AZs
+  affinity:
+    enablePodAntiAffinity: true
+    topologyKey: topology.kubernetes.io/zone
+
+  # Monitoring
+  monitoring:
+    enablePodMonitor: true

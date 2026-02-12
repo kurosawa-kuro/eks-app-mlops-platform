@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: app
+  labels:
+    app.kubernetes.io/name: app
+    app.kubernetes.io/part-of: eks-app-mlops-platform
+data:
+  # Frontend configuration
+  NEXT_PUBLIC_API_URL: "http://app-backend-service.app.svc.cluster.local:8000"
+
+  # Backend configuration
+  NODE_ENV: "production"
+  PORT: "8000"
+  ECSHOP_STORAGE_MODE: "memory"
+  ECSHOP_AUTH_MODE: "simple"
+  ENABLE_ANALYTICS_API: "true"
+  AWS_REGION: "us-east-1"
+
+  # LLM configuration
+  LLM_INFERENCE_URL: "http://llm-inference-service.llm.svc.cluster.local:8000"
+  LLM_EMBEDDINGS_URL: "http://llm-embeddings-service.llm.svc.cluster.local:8000"

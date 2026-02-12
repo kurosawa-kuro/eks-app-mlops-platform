@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+  - configmap.yaml
+  - secret.yaml
+
+patches:
+  # NodePort Service patch (overrides base ClusterIP service)
+  - path: service-nodeport.yaml
+  # Deployment patch: use ConfigMap/Secret for env vars
+  - path: deployment-patch.yaml
+  # JSON patch: Remove base env array (envFrom takes over)
+  - patch: |-
+      - op: remove
+        path: /spec/template/spec/containers/0/env
+    target:
+      kind: Deployment
+      name: monolith
