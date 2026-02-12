@@ -4,6 +4,10 @@ AWS EKS上で動作するEC Shopアプリケーション + MLOps分析パイプ�
 
 ---
 
+![alt text](docs/image.png)
+![alt text](docs/image-1.png)
+![alt text](docs/image-2.png)
+
 ## クイックスタート
 
 ### ローカル開発
