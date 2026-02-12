@@ -1,0 +1,259 @@
+<style>
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .stat-card {
+    background: var(--pico-card-background-color);
+    border: 1px solid var(--pico-muted-border-color);
+    border-radius: 0.75rem;
+    padding: 1rem;
+  }
+
+  .stat-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-card-title {
+    font-size: 0.75rem;
+    color: var(--pico-muted-color);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .stat-card-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .stat-card-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .stat-card-icon.purple { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; }
+  .stat-card-icon.green { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+  .stat-card-icon.blue { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+  .stat-card-icon.amber { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+
+  .stat-card-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--pico-h1-color);
+  }
+
+  .stat-card-change {
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    color: var(--pico-muted-color);
+  }
+
+  .config-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+
+  .config-item {
+    padding: 1rem;
+    background: var(--pico-card-background-color);
+    border: 1px solid var(--pico-muted-border-color);
+    border-radius: 0.5rem;
+  }
+
+  .config-label {
+    font-size: 0.75rem;
+    color: var(--pico-muted-color);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+  }
+
+  .config-value {
+    font-weight: 600;
+    word-break: break-all;
+  }
+
+  .config-value.success { color: var(--pico-success); }
+  .config-value.danger { color: var(--pico-danger); }
+  .config-value.muted { color: var(--pico-muted-color); }
+
+  .section-card {
+    background: var(--pico-card-background-color);
+    border: 1px solid var(--pico-muted-border-color);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 1rem 0;
+    color: var(--pico-h2-color);
+  }
+
+  .section-title svg {
+    width: 18px;
+    height: 18px;
+    color: var(--pico-primary);
+  }
+
+  .info-banner {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(99, 102, 241, 0.1));
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .info-banner h2 {
+    font-size: 1.25rem;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .info-banner p {
+    color: var(--pico-muted-color);
+    font-size: 0.875rem;
+    margin: 0;
+  }
+</style>
+
+<!-- Breadcrumb -->
+<nav class="breadcrumb">
+  <a href="/">Dashboard</a>
+  <span>/</span>
+  <span>Admin Info</span>
+</nav>
+
+<!-- Page Header -->
+<div class="page-header">
+  <div>
+    <h2 class="page-title">Server Information</h2>
+    <p class="page-subtitle">システム設定と稼働状況</p>
+  </div>
+</div>
+
+<!-- Info Banner -->
+<div class="info-banner">
+  <h2>AWS Resource Monitor</h2>
+  <p>Server information and configuration for administrators.</p>
+</div>
+
+<!-- Stats Grid -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-card-header">
+      <div class="stat-card-title">API Status</div>
+      <div class="stat-card-icon green">
+        <svg fill="currentColor" viewBox="0 0 16 16">
+          <path d="M8 0a8 8 0 1 0 8 8A8 8 0 0 0 8 0Zm3.78 5.28-4.5 5.5a.75.75 0 0 1-1.14.02l-2-2.25a.75.75 0 1 1 1.12-1l1.41 1.59 3.93-4.8a.75.75 0 1 1 1.18.94Z"/>
+        </svg>
+      </div>
+    </div>
+    <div class="stat-card-value" style="color: var(--pico-success);">Online</div>
+    <div class="stat-card-change">All systems operational</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-card-header">
+      <div class="stat-card-title">Server Time</div>
+      <div class="stat-card-icon blue">
+        <svg fill="currentColor" viewBox="0 0 16 16">
+          <path d="M8 0a8 8 0 1 0 8 8A8 8 0 0 0 8 0Zm0 14A6 6 0 1 1 8 2a6 6 0 0 1 0 12Z"/>
+          <path d="M8 4a.75.75 0 0 1 .75.75v3.5h2.5a.75.75 0 0 1 0 1.5H8a.75.75 0 0 1-.75-.75v-4.25A.75.75 0 0 1 8 4Z"/>
+        </svg>
+      </div>
+    </div>
+    <div class="stat-card-value" style="font-size: 1.25rem;"><%= timestamp %></div>
+    <div class="stat-card-change">JST (UTC+9)</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-card-header">
+      <div class="stat-card-title">Environment</div>
+      <div class="stat-card-icon amber">
+        <svg fill="currentColor" viewBox="0 0 16 16">
+          <path d="M10.5 1a3.502 3.502 0 0 1 3.355 2.5H15a1 1 0 1 1 0 2h-1.145a3.502 3.502 0 0 1-6.71 0H1a1 1 0 0 1 0-2h6.145A3.502 3.502 0 0 1 10.5 1ZM9 4.5a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Z"/>
+        </svg>
+      </div>
+    </div>
+    <div class="stat-card-value" style="font-size: 1.25rem; color: <%= config.env === 'production' ? 'var(--pico-danger)' : 'var(--pico-success)' %>;"><%= config.env %></div>
+    <div class="stat-card-change">Hono + TypeScript</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-card-header">
+      <div class="stat-card-title">AWS Region</div>
+      <div class="stat-card-icon purple">
+        <svg fill="currentColor" viewBox="0 0 16 16">
+          <path d="M8 0a8 8 0 1 0 8 8A8 8 0 0 0 8 0ZM2.04 4.326c.325 1.329 2.532 2.54 3.717 3.19.48.263.793.434.743.484-.08.08-.162.158-.242.234-.416.396-.787.749-.758 1.266.035.634.618.824 1.214 1.017.577.188 1.168.38 1.286.983.082.417-.075.988-.22 1.52-.215.782-.406 1.48.22 1.48 1.5-.5 3.798-3.186 4-5 .138-1.243-2-2-3.5-2.5-.478-.16-.755.081-.99.284-.172.15-.322.279-.51.216-.445-.148-2.5-2-1.5-2.5.78-.39.952-.171 1.227.182.078.099.163.208.273.318.609.304.662-.132.723-.633.039-.322.081-.671.277-.867.434-.434 1.265-.791 2.028-1.12.712-.306 1.365-.587 1.579-.88A7 7 0 1 1 2.04 4.327Z"/>
+        </svg>
+      </div>
+    </div>
+    <div class="stat-card-value" style="font-size: 1.25rem;"><%= config.awsRegion %></div>
+    <div class="stat-card-change">Primary region</div>
+  </div>
+</div>
+
+<!-- Server Configuration -->
+<div class="section-card">
+  <h3 class="section-title">
+    <svg fill="currentColor" viewBox="0 0 16 16">
+      <path d="M10.5 1a3.502 3.502 0 0 1 3.355 2.5H15a1 1 0 1 1 0 2h-1.145a3.502 3.502 0 0 1-6.71 0H1a1 1 0 0 1 0-2h6.145A3.502 3.502 0 0 1 10.5 1ZM9 4.5a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0ZM5.5 9a3.502 3.502 0 0 1 3.355 2.5H15a1 1 0 1 1 0 2H8.855a3.502 3.502 0 0 1-6.71 0H1a1 1 0 1 1 0-2h1.145A3.502 3.502 0 0 1 5.5 9ZM4 12.5a1.5 1.5 0 1 0 3 0 1.5 1.5 0 0 0-3 0Z" fill-rule="evenodd"/>
+    </svg>
+    Server Configuration
+  </h3>
+  <div class="config-grid">
+    <div class="config-item">
+      <div class="config-label">Project Name</div>
+      <div class="config-value"><%= config.projectName %></div>
+    </div>
+    <div class="config-item">
+      <div class="config-label">Port</div>
+      <div class="config-value"><%= config.port %></div>
+    </div>
+    <div class="config-item">
+      <div class="config-label">Log Level</div>
+      <div class="config-value"><%= config.logLevel %></div>
+    </div>
+    <div class="config-item">
+      <div class="config-label">CORS Origins</div>
+      <div class="config-value muted"><%= config.corsOrigins %></div>
+    </div>
+  </div>
+</div>
+
+<!-- Cache Configuration -->
+<div class="section-card">
+  <h3 class="section-title">
+    <svg fill="currentColor" viewBox="0 0 16 16">
+      <path d="M8 0a8 8 0 1 0 8 8A8 8 0 0 0 8 0Zm0 14A6 6 0 1 1 8 2a6 6 0 0 1 0 12Z"/>
+      <path d="M8 4a.75.75 0 0 1 .75.75v3.5h2.5a.75.75 0 0 1 0 1.5H8a.75.75 0 0 1-.75-.75v-4.25A.75.75 0 0 1 8 4Z"/>
+    </svg>
+    Cache Settings
+  </h3>
+  <div class="config-grid">
+    <div class="config-item">
+      <div class="config-label">Resources TTL</div>
+      <div class="config-value"><%= Math.floor(config.cacheTtlResources / 60000) %> minutes</div>
+    </div>
+    <div class="config-item">
+      <div class="config-label">Costs TTL</div>
+      <div class="config-value"><%= Math.floor(config.cacheTtlCosts / 60000) %> minutes</div>
+    </div>
+  </div>
+</div>

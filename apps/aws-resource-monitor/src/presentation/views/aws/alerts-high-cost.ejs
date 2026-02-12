@@ -1,0 +1,232 @@
+<style>
+  /* High Cost Alerts Page Styles */
+
+  /* Page-specific: larger padding for resource items */
+  .resource-item {
+    padding: 0.5rem 0;
+  }
+
+  /* Warning Banner */
+  .warning-banner {
+    background: linear-gradient(90deg, rgba(239, 68, 68, 0.15), rgba(249, 115, 22, 0.1));
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 0.5rem;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .warning-banner-icon {
+    font-size: 1.5rem;
+  }
+
+  .warning-banner-text {
+    flex: 1;
+  }
+
+  .warning-banner-title {
+    font-weight: 600;
+    color: #dc2626;
+    margin-bottom: 0.25rem;
+  }
+
+  .warning-banner-desc {
+    font-size: 0.85rem;
+    color: var(--pico-muted-color);
+  }
+
+  /* Systemlog Link */
+  .systemlog-link {
+    text-decoration: none;
+    font-size: 0.9rem;
+    opacity: 0.7;
+    transition: opacity 0.15s ease;
+    margin-left: auto;
+    padding: 0.125rem 0.25rem;
+  }
+
+  .systemlog-link:hover {
+    opacity: 1;
+  }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    background: var(--pico-card-background-color);
+    border-radius: 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+</style>
+
+<!-- Breadcrumb -->
+<nav class="breadcrumb">
+  <a href="/">Dashboard</a>
+  <span>/</span>
+  <span>High Cost Alerts</span>
+</nav>
+
+<!-- Page Header -->
+<div class="page-header">
+  <div>
+    <h2 class="page-title">High Cost Risk Resources</h2>
+    <p class="page-subtitle">放置すると高額課金につながるリソース一覧</p>
+  </div>
+  <button class="refresh-btn" onclick="refreshResources()">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+      <path d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+      <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+    </svg>
+    Refresh
+  </button>
+</div>
+
+<!-- Warning Banner -->
+<div class="warning-banner">
+  <span class="warning-banner-icon">💰</span>
+  <div class="warning-banner-text">
+    <div class="warning-banner-title">消し忘れ注意！検証終了後は必ず削除してください</div>
+    <div class="warning-banner-desc">以下のリソースは時間課金または使用量課金で、放置すると高額請求につながります</div>
+  </div>
+</div>
+
+<!-- Stats Bar -->
+<div class="stats-bar">
+  <div class="stat-item danger">
+    <span class="stat-label">Total Alerts</span>
+    <span class="stat-value danger"><%= totalCount %></span>
+  </div>
+  <div class="stat-item danger">
+    <span class="stat-label">Critical (S)</span>
+    <span class="stat-value danger"><%= criticalCount %></span>
+  </div>
+  <div class="stat-item warning">
+    <span class="stat-label">Warning (A)</span>
+    <span class="stat-value warning"><%= warningCount %></span>
+  </div>
+  <% if (lastUpdated) { %>
+  <div class="stat-item">
+    <span class="stat-label">Last Updated</span>
+    <span class="stat-value" style="font-size: 0.875rem;"><%= lastUpdated %></span>
+  </div>
+  <% } %>
+</div>
+
+<!-- Legend -->
+<div class="legend">
+  <div class="legend-item">
+    <span class="cost-badge critical">S</span>
+    <span>即課金（時間単位で課金発生）</span>
+  </div>
+  <div class="legend-item">
+    <span class="cost-badge warning">A</span>
+    <span>注意（条件により課金発生）</span>
+  </div>
+</div>
+
+<% if (totalCount === 0) { %>
+<!-- No Alerts -->
+<div class="empty-state" style="text-align: center; padding: 3rem;">
+  <div style="font-size: 3rem; margin-bottom: 1rem;">✅</div>
+  <h3 style="color: var(--pico-success);">高コストリスクなし</h3>
+  <p style="color: var(--pico-muted-color);">現在、高額課金リスクのあるリソースは検出されていません</p>
+</div>
+<% } else { %>
+
+<!-- Critical Resources (S) -->
+<% if (criticalCount > 0) { %>
+<div class="section-header">
+  <h3 class="section-title">🔴 Critical Resources (S)</h3>
+  <span style="color: var(--pico-muted-color); font-size: 0.8rem;"><%= criticalCount %> resources</span>
+</div>
+
+<div class="resource-grid">
+  <% highCostCriticalTypes.forEach(type => { %>
+    <% const items = resourcesByType[type] || []; %>
+    <% if (items.length > 0) { %>
+    <div class="resource-card <%= helpers.getCostClass(type, highCostCriticalTypes, highCostWarningTypes) %>">
+      <div class="resource-card-header">
+        <span class="resource-card-title">
+          <%= resourceTypeLabels[type] || type %>
+          <%- helpers.getCostBadge(type, highCostCriticalTypes, highCostWarningTypes) %>
+        </span>
+        <span class="resource-card-count"><%= items.length %> items</span>
+      </div>
+      <ul class="resource-list">
+        <% items.forEach(item => { %>
+          <li class="resource-item">
+            <span class="status-dot <%= helpers.getStatusClass(item.state) %>"></span>
+            <span class="resource-name"><%= item.name || item.resourceId %></span>
+            <span class="resource-state"><%= item.state %></span>
+            <% if (type === 'nodegroup' && item.metadata && item.metadata.clusterName) { %>
+              <a href="/eks/nodegroups/<%= item.metadata.clusterName %>/<%= item.name %>/systemlog"
+                 class="systemlog-link"
+                 title="View System Log">
+                📋
+              </a>
+            <% } %>
+          </li>
+        <% }); %>
+      </ul>
+    </div>
+    <% } %>
+  <% }); %>
+</div>
+<% } %>
+
+<!-- Warning Resources (A) -->
+<% if (warningCount > 0) { %>
+<div class="section-header">
+  <h3 class="section-title">🟡 Warning Resources (A)</h3>
+  <span style="color: var(--pico-muted-color); font-size: 0.8rem;"><%= warningCount %> resources</span>
+</div>
+
+<div class="resource-grid">
+  <% highCostWarningTypes.forEach(type => { %>
+    <% const items = resourcesByType[type] || []; %>
+    <% if (items.length > 0) { %>
+    <div class="resource-card <%= helpers.getCostClass(type, highCostCriticalTypes, highCostWarningTypes) %>">
+      <div class="resource-card-header">
+        <span class="resource-card-title">
+          <%= resourceTypeLabels[type] || type %>
+          <%- helpers.getCostBadge(type, highCostCriticalTypes, highCostWarningTypes) %>
+        </span>
+        <span class="resource-card-count"><%= items.length %> items</span>
+      </div>
+      <ul class="resource-list">
+        <% items.forEach(item => { %>
+          <li class="resource-item">
+            <span class="status-dot <%= helpers.getStatusClass(item.state) %>"></span>
+            <span class="resource-name"><%= item.name || item.resourceId %></span>
+            <span class="resource-state"><%= item.state %></span>
+          </li>
+        <% }); %>
+      </ul>
+    </div>
+    <% } %>
+  <% }); %>
+</div>
+<% } %>
+
+<% } %>
+
+<script>
+async function refreshResources() {
+  try {
+    await apiFetch('/api/resources/refresh', { method: 'POST' });
+    window.location.reload();
+  } catch (error) {
+    console.error('Failed to refresh:', error);
+  }
+}
+</script>

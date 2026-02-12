@@ -1,0 +1,484 @@
+<style>
+  .nodegroup-card {
+    background: var(--pico-card-background-color);
+    border: 1px solid var(--pico-muted-border-color);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .nodegroup-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .nodegroup-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(99, 102, 241, 0.1));
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nodegroup-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--pico-h1-color);
+    margin: 0;
+  }
+
+  .nodegroup-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    font-size: 0.875rem;
+  }
+
+  .meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .meta-label {
+    color: var(--pico-muted-color);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .meta-value {
+    color: var(--pico-color);
+    font-weight: 500;
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .status-active {
+    background: rgba(34, 197, 94, 0.15);
+    color: #22c55e;
+  }
+
+  .status-other {
+    background: rgba(107, 114, 128, 0.15);
+    color: #6b7280;
+  }
+
+  /* Instance Table */
+  .instance-section {
+    margin-bottom: 1.5rem;
+  }
+
+  .section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--pico-h2-color);
+    margin: 0 0 1rem 0;
+  }
+
+  .instance-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--pico-card-background-color);
+    border-radius: 0.5rem;
+    overflow: hidden;
+  }
+
+  .instance-table th,
+  .instance-table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--pico-muted-border-color);
+  }
+
+  .instance-table th {
+    background: rgba(139, 92, 246, 0.05);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--pico-muted-color);
+    font-weight: 500;
+  }
+
+  .instance-table tr {
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .instance-table tr:hover {
+    background: rgba(139, 92, 246, 0.05);
+  }
+
+  .instance-table tr.selected {
+    background: rgba(139, 92, 246, 0.1);
+    border-left: 3px solid var(--pico-primary);
+  }
+
+  .instance-id {
+    font-family: 'SF Mono', Monaco, Consolas, monospace;
+    font-size: 0.8rem;
+  }
+
+  .instance-state {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .state-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .state-running { background: #22c55e; }
+  .state-stopped { background: #ef4444; }
+  .state-pending { background: #f59e0b; }
+  .state-other { background: #6b7280; }
+
+  /* Systemlog Section */
+  .systemlog-section {
+    background: var(--pico-card-background-color);
+    border: 1px solid var(--pico-muted-border-color);
+    border-radius: 0.75rem;
+    overflow: hidden;
+  }
+
+  .systemlog-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--pico-muted-border-color);
+    background: rgba(139, 92, 246, 0.05);
+  }
+
+  .systemlog-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: var(--pico-h2-color);
+  }
+
+  .refresh-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--pico-primary);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .refresh-btn:hover {
+    background: var(--pico-primary-hover);
+  }
+
+  .refresh-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .systemlog-content {
+    padding: 1rem 1.25rem;
+    min-height: 300px;
+    max-height: 500px;
+    overflow: auto;
+  }
+
+  .systemlog-output {
+    font-family: 'SF Mono', Monaco, Consolas, monospace;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-all;
+    color: var(--pico-color);
+    margin: 0;
+  }
+
+  .systemlog-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    color: var(--pico-muted-color);
+    text-align: center;
+  }
+
+  .systemlog-empty-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .systemlog-timestamp {
+    padding: 0.75rem 1.25rem;
+    border-top: 1px solid var(--pico-muted-border-color);
+    font-size: 0.75rem;
+    color: var(--pico-muted-color);
+  }
+
+  .loading-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 0.8s ease-in-out infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .no-instances {
+    padding: 2rem;
+    text-align: center;
+    color: var(--pico-muted-color);
+  }
+</style>
+
+<!-- Breadcrumb -->
+<nav class="breadcrumb">
+  <a href="/">Dashboard</a>
+  <span>/</span>
+  <span>EKS Systemlog</span>
+</nav>
+
+<!-- Page Header -->
+<div class="page-header">
+  <div>
+    <h2 class="page-title">EKS Nodegroup System Log</h2>
+    <p class="page-subtitle">View EC2 console output for nodegroup instances</p>
+  </div>
+</div>
+
+<!-- Nodegroup Info Card -->
+<div class="nodegroup-card">
+  <div class="nodegroup-header">
+    <div class="nodegroup-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 6v6l4 2"/>
+      </svg>
+    </div>
+    <div>
+      <h3 class="nodegroup-title"><%= nodegroupName %></h3>
+      <span style="font-size: 0.875rem; color: var(--pico-muted-color);">Cluster: <%= clusterName %></span>
+    </div>
+  </div>
+  <div class="nodegroup-meta">
+    <div class="meta-item">
+      <span class="meta-label">Status</span>
+      <span class="status-badge <%= nodegroupInfo.nodegroup.status === 'ACTIVE' ? 'status-active' : 'status-other' %>">
+        <%= nodegroupInfo.nodegroup.status %>
+      </span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Instance Types</span>
+      <span class="meta-value"><%= nodegroupInfo.nodegroup.instanceTypes.join(', ') || 'N/A' %></span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Scaling</span>
+      <span class="meta-value">
+        <%= nodegroupInfo.nodegroup.desiredSize %> desired
+        (<%= nodegroupInfo.nodegroup.minSize %> - <%= nodegroupInfo.nodegroup.maxSize %>)
+      </span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Capacity Type</span>
+      <span class="meta-value"><%= nodegroupInfo.nodegroup.capacityType || 'N/A' %></span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">AMI Type</span>
+      <span class="meta-value"><%= nodegroupInfo.nodegroup.amiType || 'N/A' %></span>
+    </div>
+  </div>
+</div>
+
+<!-- EC2 Instances -->
+<div class="instance-section">
+  <h3 class="section-title">EC2 Instances (<%= nodegroupInfo.instances.length %>)</h3>
+  <% if (nodegroupInfo.instances.length === 0) { %>
+    <div class="no-instances">
+      No EC2 instances found for this nodegroup
+    </div>
+  <% } else { %>
+    <table class="instance-table">
+      <thead>
+        <tr>
+          <th>Instance ID</th>
+          <th>State</th>
+          <th>Instance Type</th>
+          <th>AZ</th>
+          <th>Private IP</th>
+          <th>Launch Time</th>
+        </tr>
+      </thead>
+      <tbody id="instance-tbody">
+        <% nodegroupInfo.instances.forEach((instance, index) => { %>
+          <tr data-instance-id="<%= instance.instanceId %>" onclick="selectInstance('<%= instance.instanceId %>')" class="<%= index === 0 ? 'selected' : '' %>">
+            <td class="instance-id"><%= instance.instanceId %></td>
+            <td>
+              <span class="instance-state">
+                <span class="state-dot state-<%= instance.state === 'running' ? 'running' : (instance.state === 'stopped' ? 'stopped' : (instance.state === 'pending' ? 'pending' : 'other')) %>"></span>
+                <%= instance.state %>
+              </span>
+            </td>
+            <td><%= instance.instanceType || 'N/A' %></td>
+            <td><%= instance.availabilityZone || 'N/A' %></td>
+            <td><%= instance.privateIpAddress || 'N/A' %></td>
+            <td><%= instance.launchTime ? new Date(instance.launchTime).toLocaleString() : 'N/A' %></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  <% } %>
+</div>
+
+<!-- System Log -->
+<div class="systemlog-section">
+  <div class="systemlog-header">
+    <div class="systemlog-title">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/>
+        <line x1="16" y1="17" x2="8" y2="17"/>
+        <polyline points="10 9 9 9 8 9"/>
+      </svg>
+      System Log
+      <span id="selected-instance-id" style="font-weight: normal; color: var(--pico-muted-color); margin-left: 0.5rem;">
+        <% if (nodegroupInfo.instances.length > 0) { %>
+          (<%= nodegroupInfo.instances[0].instanceId %>)
+        <% } %>
+      </span>
+    </div>
+    <button class="refresh-btn" id="refresh-btn" onclick="refreshSystemlog()" <% if (nodegroupInfo.instances.length === 0) { %>disabled<% } %>>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+        <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+      </svg>
+      <span id="refresh-btn-text">Refresh</span>
+    </button>
+  </div>
+  <div class="systemlog-content" id="systemlog-content">
+    <div class="systemlog-empty" id="systemlog-empty">
+      <div class="systemlog-empty-icon">📋</div>
+      <div>
+        <% if (nodegroupInfo.instances.length === 0) { %>
+          No instances available
+        <% } else { %>
+          Click an instance to view system log
+        <% } %>
+      </div>
+    </div>
+    <pre class="systemlog-output" id="systemlog-output" style="display: none;"></pre>
+  </div>
+  <div class="systemlog-timestamp" id="systemlog-timestamp" style="display: none;">
+    Last fetched: <span id="fetch-time"></span>
+  </div>
+</div>
+
+<script>
+let currentInstanceId = '<%= nodegroupInfo.instances.length > 0 ? nodegroupInfo.instances[0].instanceId : "" %>';
+
+// Auto-load first instance log on page load
+document.addEventListener('DOMContentLoaded', () => {
+  if (currentInstanceId) {
+    fetchSystemlog(currentInstanceId);
+  }
+});
+
+function selectInstance(instanceId) {
+  currentInstanceId = instanceId;
+
+  // Update UI selection
+  document.querySelectorAll('#instance-tbody tr').forEach(row => {
+    row.classList.remove('selected');
+    if (row.dataset.instanceId === instanceId) {
+      row.classList.add('selected');
+    }
+  });
+
+  document.getElementById('selected-instance-id').textContent = `(${instanceId})`;
+
+  // Fetch system log
+  fetchSystemlog(instanceId);
+}
+
+async function fetchSystemlog(instanceId) {
+  const btn = document.getElementById('refresh-btn');
+  const btnText = document.getElementById('refresh-btn-text');
+  const content = document.getElementById('systemlog-content');
+  const output = document.getElementById('systemlog-output');
+  const empty = document.getElementById('systemlog-empty');
+  const timestamp = document.getElementById('systemlog-timestamp');
+  const fetchTime = document.getElementById('fetch-time');
+
+  // Show loading state
+  btn.disabled = true;
+  btnText.innerHTML = '<span class="loading-spinner"></span>';
+
+  try {
+    const response = await apiFetch(`/aws/api/eks/instances/${instanceId}/systemlog`);
+    const data = await response.json();
+
+    if (data.success && data.data.consoleOutput) {
+      output.textContent = data.data.consoleOutput;
+      output.style.display = 'block';
+      empty.style.display = 'none';
+      timestamp.style.display = 'block';
+      fetchTime.textContent = data.data.timestamp
+        ? new Date(data.data.timestamp).toLocaleString()
+        : new Date().toLocaleString();
+    } else {
+      output.style.display = 'none';
+      empty.style.display = 'flex';
+      empty.innerHTML = `
+        <div class="systemlog-empty-icon">⚠️</div>
+        <div>System log is empty or not yet available</div>
+        <div style="font-size: 0.75rem; margin-top: 0.5rem;">Last checked: ${new Date().toLocaleString()}</div>
+      `;
+      timestamp.style.display = 'none';
+    }
+  } catch (error) {
+    console.error('Failed to fetch system log:', error);
+    output.style.display = 'none';
+    empty.style.display = 'flex';
+    empty.innerHTML = `
+      <div class="systemlog-empty-icon">❌</div>
+      <div>Failed to fetch system log</div>
+      <div style="font-size: 0.75rem; margin-top: 0.5rem;">${error.message}</div>
+    `;
+    timestamp.style.display = 'none';
+  } finally {
+    btn.disabled = false;
+    btnText.textContent = 'Refresh';
+  }
+}
+
+function refreshSystemlog() {
+  if (currentInstanceId) {
+    fetchSystemlog(currentInstanceId);
+  }
+}
+</script>

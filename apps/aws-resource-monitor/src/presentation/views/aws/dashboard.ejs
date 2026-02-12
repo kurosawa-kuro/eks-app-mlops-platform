@@ -1,0 +1,333 @@
+<style>
+  /* Page-specific: Dashboard list has shorter max-height */
+  .resource-list {
+    max-height: 200px;
+  }
+
+  /* Cost Summary */
+  .cost-summary-card {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(99, 102, 241, 0.1));
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .cost-summary-info h3 {
+    font-size: 0.875rem;
+    color: var(--pico-muted-color);
+    margin: 0 0 0.25rem 0;
+    font-weight: 500;
+  }
+
+  .cost-summary-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--pico-h1-color);
+  }
+
+  .cost-summary-period {
+    font-size: 0.75rem;
+    color: var(--pico-muted-color);
+    margin-top: 0.25rem;
+  }
+
+  .cost-summary-link {
+    color: var(--pico-primary);
+    text-decoration: none;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .cost-summary-link:hover {
+    text-decoration: underline;
+  }
+
+  /* Category Collapsible */
+  .category-section {
+    margin-bottom: 1rem;
+  }
+
+  .category-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: var(--pico-card-background-color);
+    border: 1px solid var(--pico-muted-border-color);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .category-header:hover {
+    background: rgba(139, 92, 246, 0.05);
+  }
+
+  .category-header.open {
+    border-radius: 0.5rem 0.5rem 0 0;
+    border-bottom: none;
+  }
+
+  .category-toggle {
+    width: 16px;
+    height: 16px;
+    fill: var(--pico-muted-color);
+    transition: transform 0.2s ease;
+  }
+
+  .category-header.open .category-toggle {
+    transform: rotate(90deg);
+  }
+
+  .category-title {
+    flex: 1;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--pico-color);
+  }
+
+  .category-count {
+    font-size: 0.75rem;
+    color: var(--pico-muted-color);
+  }
+
+  .category-content {
+    display: none;
+    padding: 1rem;
+    background: var(--pico-card-background-color);
+    border: 1px solid var(--pico-muted-border-color);
+    border-top: none;
+    border-radius: 0 0 0.5rem 0.5rem;
+  }
+
+  .category-content.open {
+    display: block;
+  }
+
+  .category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+
+  /* Alert Summary Card */
+  .alert-summary-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(249, 115, 22, 0.05));
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .alert-summary-card.no-alerts {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), transparent);
+    border-color: rgba(16, 185, 129, 0.3);
+  }
+
+  .alert-icon {
+    font-size: 1.5rem;
+  }
+
+  .alert-info {
+    flex: 1;
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+
+  .alert-count {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ef4444;
+  }
+
+  .alert-summary-card.no-alerts .alert-count {
+    color: var(--pico-success);
+  }
+
+  .alert-label {
+    font-size: 0.875rem;
+    color: var(--pico-muted-color);
+  }
+
+  .alert-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.5rem 1rem;
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 0.5rem;
+    color: #ef4444;
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.15s ease;
+  }
+
+  .alert-link:hover {
+    background: rgba(239, 68, 68, 0.25);
+  }
+
+  .alert-summary-card.no-alerts .alert-link {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: rgba(16, 185, 129, 0.3);
+    color: var(--pico-success);
+  }
+</style>
+
+<!-- Breadcrumb -->
+<nav class="breadcrumb">
+  <span>Dashboard</span>
+</nav>
+
+<!-- Page Header -->
+<div class="page-header">
+  <div>
+    <h2 class="page-title">AWS Resources</h2>
+    <p class="page-subtitle">Monitor your AWS resources in real-time</p>
+  </div>
+  <button class="refresh-btn" onclick="refreshResources()">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+      <path d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+      <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+    </svg>
+    Refresh
+  </button>
+</div>
+
+<!-- Stats Bar -->
+<div class="stats-bar">
+  <div class="stat-item">
+    <span class="stat-label">Total Resources</span>
+    <span class="stat-value"><%= stats.total %></span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-label">EKS Clusters</span>
+    <span class="stat-value highlight"><%= stats.byType.eks || 0 %></span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-label">EC2 Instances</span>
+    <span class="stat-value"><%= stats.byType.ec2 || 0 %></span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-label">Load Balancers</span>
+    <span class="stat-value"><%= stats.byType.elb || 0 %></span>
+  </div>
+  <% if (lastUpdated) { %>
+  <div class="stat-item">
+    <span class="stat-label">Last Updated</span>
+    <span class="stat-value" style="font-size: 0.875rem;"><%= lastUpdated %></span>
+  </div>
+  <% } %>
+</div>
+
+<!-- Cost Summary -->
+<% if (costSummary && costSummary.totalAmount > 0) { %>
+<div class="cost-summary-card">
+  <div class="cost-summary-info">
+    <h3>Monthly Cost</h3>
+    <div class="cost-summary-value">$<%= costSummary.totalAmount.toFixed(2) %> <%= costSummary.unit %></div>
+    <div class="cost-summary-period"><%= costSummary.periodStart %> ~ <%= costSummary.periodEnd %></div>
+  </div>
+  <a href="/costs" class="cost-summary-link">
+    View Details
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+      <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+    </svg>
+  </a>
+</div>
+<% } %>
+
+<!-- High Cost Alert Summary -->
+<div class="alert-summary-card<%= highCostAlertCount === 0 ? ' no-alerts' : '' %>">
+  <span class="alert-icon"><%= highCostAlertCount > 0 ? '⚠️' : '✅' %></span>
+  <div class="alert-info">
+    <span class="alert-count"><%= highCostAlertCount %></span>
+    <span class="alert-label"><%= highCostAlertCount === 0 ? 'No high cost risks detected' : 'High Cost Risk Resources' %></span>
+  </div>
+  <a href="/alerts/high-cost" class="alert-link">
+    <%= highCostAlertCount > 0 ? 'View Details' : 'Check Status' %>
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+      <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+    </svg>
+  </a>
+</div>
+
+<!-- Resources by Category -->
+<div class="section-header">
+  <h3 class="section-title">All Resources by Category</h3>
+</div>
+
+<% Object.entries(resourceCategories).forEach(([category, categoryLabel]) => { %>
+  <% const categoryTypes = categoryResources[category] || []; %>
+  <% const categoryTotal = categoryTypes.reduce((sum, type) => sum + (resourcesByType[type]?.length || 0), 0); %>
+  <% if (categoryTotal > 0) { %>
+  <div class="category-section">
+    <div class="category-header" onclick="toggleCategory(this)">
+      <svg class="category-toggle" viewBox="0 0 16 16">
+        <path d="M6 12.796V3.204L11.481 8 6 12.796z"/>
+      </svg>
+      <span class="category-title"><%= categoryLabel %></span>
+      <span class="category-count"><%= categoryTotal %> resources</span>
+    </div>
+    <div class="category-content">
+      <div class="category-grid">
+        <% categoryTypes.forEach(type => { %>
+          <% const items = resourcesByType[type] || []; %>
+          <% if (items.length > 0) { %>
+          <div class="resource-card">
+            <div class="resource-card-header">
+              <span class="resource-card-title"><%= resourceTypeLabels[type] || type %></span>
+              <span class="resource-card-count"><%= items.length %></span>
+            </div>
+            <ul class="resource-list">
+              <% items.slice(0, 5).forEach(item => { %>
+                <li class="resource-item">
+                  <span class="status-dot <%= helpers.getStatusClass(item.state) %>"></span>
+                  <span class="resource-name"><%= item.name || item.resourceId %></span>
+                  <span class="resource-state"><%= item.state %></span>
+                </li>
+              <% }); %>
+              <% if (items.length > 5) { %>
+                <li class="resource-item">
+                  <a href="/resources?type=<%= type %>" style="color: var(--pico-primary); text-decoration: none;">
+                    View all <%= items.length %> resources
+                  </a>
+                </li>
+              <% } %>
+            </ul>
+          </div>
+          <% } %>
+        <% }); %>
+      </div>
+    </div>
+  </div>
+  <% } %>
+<% }); %>
+
+<script>
+function toggleCategory(header) {
+  header.classList.toggle('open');
+  const content = header.nextElementSibling;
+  content.classList.toggle('open');
+}
+
+async function refreshResources() {
+  try {
+    await apiFetch('/api/resources/refresh', { method: 'POST' });
+    window.location.reload();
+  } catch (error) {
+    console.error('Failed to refresh:', error);
+  }
+}
+</script>

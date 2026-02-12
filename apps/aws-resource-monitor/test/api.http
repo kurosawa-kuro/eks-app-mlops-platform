@@ -1,0 +1,89 @@
+### Hono Backend API Tests
+### Base URL
+@baseUrl = http://localhost:8001
+
+###############################################
+# Public API (no auth required)
+###############################################
+
+### Health Check
+GET {{baseUrl}}/api/health
+
+### Server Info
+GET {{baseUrl}}/api/info
+
+###############################################
+# Auth API
+###############################################
+
+### Auth Status
+GET {{baseUrl}}/auth/status
+
+### Auth Me (current user info)
+GET {{baseUrl}}/auth/me
+
+### Login Page
+GET {{baseUrl}}/auth/login
+
+###############################################
+# Pages (HTML)
+###############################################
+
+### Root (redirects to dashboard)
+GET {{baseUrl}}/
+
+### Dashboard Page
+GET {{baseUrl}}/dashboard
+
+### Settings Page
+GET {{baseUrl}}/settings
+
+### Admin Page
+GET {{baseUrl}}/admin
+
+### Devtool Page
+GET {{baseUrl}}/devtool
+
+### System Jobs Page
+GET {{baseUrl}}/system/jobs
+
+###############################################
+# Settings API
+###############################################
+
+### Get Settings
+GET {{baseUrl}}/settings/api
+
+### Save Settings
+POST {{baseUrl}}/settings/api
+Content-Type: application/json
+
+{
+  "isCloud": true,
+  "isStub": false,
+  "aiModel": "gpt-4"
+}
+
+### Get Settings History
+GET {{baseUrl}}/settings/api/history
+
+###############################################
+# System Jobs API
+###############################################
+
+### List All Reservations
+GET {{baseUrl}}/system/jobs/api
+
+### Create Reservation
+POST {{baseUrl}}/system/jobs/api
+Content-Type: application/json
+
+{
+  "name": "Test Job"
+}
+
+### Get Reservation Status
+GET {{baseUrl}}/system/jobs/api/reservation-id-here
+
+### Delete Reservation
+DELETE {{baseUrl}}/system/jobs/api/reservation-id-here
