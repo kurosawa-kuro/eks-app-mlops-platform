@@ -1,0 +1,36 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: data-analytics
+  namespace: mlops
+  labels:
+    app: mlops-pipeline
+    stage: analytics
+spec:
+  ttlSecondsAfterFinished: 3600
+  backoffLimit: 2
+  template:
+    metadata:
+      labels:
+        app: mlops-pipeline
+        stage: analytics
+    spec:
+      serviceAccountName: mlops-sa
+      restartPolicy: Never
+      containers:
+        - name: analytics
+          image: PLACEHOLDER_ECR_URL:latest
+          args: ["--stage", "analytics"]
+          envFrom:
+            - configMapRef:
+                name: mlops-config
+          env:
+            - name: USE_DUMMY_DATA
+              value: "true"
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "2Gi"
+              cpu: "1000m"

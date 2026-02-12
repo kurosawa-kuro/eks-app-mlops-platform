@@ -1,0 +1,18 @@
+boto3>=1.34.0
+pandas>=2.1.0
+scikit-learn>=1.4.0
+numpy>=1.26.0
+
+# Analytics adapters
+duckdb>=1.1.0
+snowflake-connector-python>=3.6.0
+
+# Sentiment Analysis
+transformers>=4.36.0
+torch>=2.1.0
+scipy>=1.11.0
+protobuf>=4.25.0
+
+# Japanese NLP (MeCab tokenizer for Japanese BERT)
+fugashi>=1.3.0
+unidic-lite>=1.0.8

@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: data-preprocess
+  namespace: mlops
+  labels:
+    app: mlops-pipeline
+    stage: preprocess
+spec:
+  ttlSecondsAfterFinished: 3600
+  backoffLimit: 2
+  template:
+    metadata:
+      labels:
+        app: mlops-pipeline
+        stage: preprocess
+    spec:
+      serviceAccountName: mlops-sa
+      restartPolicy: Never
+      containers:
+        - name: preprocess
+          image: PLACEHOLDER_ECR_URL:latest
+          args: ["--stage", "preprocess"]
+          envFrom:
+            - configMapRef:
+                name: mlops-config
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"

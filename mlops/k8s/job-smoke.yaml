@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mlops-smoke
+  namespace: mlops
+  labels:
+    app: mlops-pipeline
+    stage: smoke
+spec:
+  ttlSecondsAfterFinished: 60
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app: mlops-pipeline
+        stage: smoke
+    spec:
+      serviceAccountName: mlops-sa
+      restartPolicy: Never
+      containers:
+        - name: smoke
+          image: PLACEHOLDER_ECR_URL:latest
+          args: ["--stage", "smoke"]
+          envFrom:
+            - configMapRef:
+                name: mlops-config
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "100m"
+              memory: "128Mi"
