@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{name}}
+{{#if labels}}
+  labels:
+{{#each labels}}
+    {{@key}}: "{{@value}}"
+{{/each}}
+{{/if}}

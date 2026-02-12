@@ -1,0 +1,35 @@
+apiVersion: karpenter.sh/v1
+kind: NodePool
+metadata:
+  name: {{name}}
+spec:
+  template:
+    metadata:
+      labels:
+        workload: {{workload}}
+    spec:
+{{#if taints}}
+      taints:
+{{#each taints}}
+        - key: {{key}}
+          value: "{{value}}"
+          effect: {{effect}}
+{{/each}}
+{{/if}}
+      requirements:
+        - key: karpenter.sh/capacity-type
+          operator: In
+          values: [{{capacityTypes:"spot", "on-demand"}}]
+        - key: node.kubernetes.io/instance-type
+          operator: In
+          values: [{{instanceTypes}}]
+      nodeClassRef:
+        group: karpenter.k8s.aws
+        kind: EC2NodeClass
+        name: {{nodeClassName}}
+  limits:
+    cpu: {{cpuLimit:64}}
+    memory: {{memoryLimit:256Gi}}
+  disruption:
+    consolidationPolicy: {{consolidationPolicy:WhenEmptyOrUnderutilized}}
+    consolidateAfter: {{consolidateAfter:5m}}
