@@ -1,0 +1,7 @@
+{
+  "bastionInstanceId": "i-093a03d202d7d4dc8",
+  "eksClusterName": "prod-eks-cluster",
+  "eksEndpoint": "05786D27867C1DE4A3B78264D48854AB.gr7.ap-northeast-1.eks.amazonaws.com",
+  "region": "ap-northeast-1",
+  "localPort": 6443
+}

@@ -1,0 +1,557 @@
+<style>
+  /* Page Header */
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Filters Bar */
+  .filters-bar {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .filter-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .filter-group label {
+    font-size: 0.75rem;
+    color: var(--pico-muted-color);
+    white-space: nowrap;
+  }
+
+  .filter-group select,
+  .filter-group input {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--pico-muted-border-color);
+    border-radius: 0.375rem;
+    background: var(--pico-card-background-color);
+    color: var(--pico-color);
+    font-size: 0.875rem;
+    min-width: 120px;
+  }
+
+  .filter-group input[type="search"] {
+    min-width: 200px;
+  }
+
+  .filter-group select:focus,
+  .filter-group input:focus {
+    outline: none;
+    border-color: var(--pico-primary);
+  }
+
+  /* Resource Table */
+  .resource-table-container {
+    background: var(--pico-card-background-color);
+    border: 1px solid var(--pico-muted-border-color);
+    border-radius: 0.75rem;
+    overflow: hidden;
+  }
+
+  .resource-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .resource-table th {
+    text-align: left;
+    padding: 0.875rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--pico-muted-color);
+    background: var(--pico-background-color);
+    border-bottom: 1px solid var(--pico-muted-border-color);
+    white-space: nowrap;
+  }
+
+  .resource-table th.sortable {
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .resource-table th.sortable:hover {
+    color: var(--pico-primary);
+  }
+
+  .resource-table th .sort-icon {
+    display: inline-block;
+    margin-left: 0.25rem;
+    opacity: 0.5;
+  }
+
+  .resource-table th.sorted .sort-icon {
+    opacity: 1;
+    color: var(--pico-primary);
+  }
+
+  .resource-table td {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    border-bottom: 1px solid var(--pico-muted-border-color);
+  }
+
+  .resource-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .resource-table tr:hover td {
+    background: rgba(139, 92, 246, 0.05);
+  }
+
+  .resource-name {
+    font-weight: 500;
+    color: var(--pico-color);
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .resource-id {
+    font-family: 'SF Mono', Monaco, Consolas, monospace;
+    font-size: 0.75rem;
+    color: var(--pico-muted-color);
+  }
+
+  .resource-project {
+    font-size: 0.875rem;
+    color: var(--pico-primary);
+    font-weight: 500;
+  }
+
+  .resource-date {
+    font-size: 0.75rem;
+    color: var(--pico-muted-color);
+    white-space: nowrap;
+  }
+
+  .resource-type {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    background: var(--pico-background-color);
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    color: var(--pico-muted-color);
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    text-transform: lowercase;
+  }
+
+  .status-badge .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+
+  .status-ok { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+  .status-ok .status-dot { background: #22c55e; }
+
+  .status-pending { background: rgba(234, 179, 8, 0.1); color: #eab308; }
+  .status-pending .status-dot { background: #eab308; }
+
+  .status-warning { background: rgba(249, 115, 22, 0.1); color: #f97316; }
+  .status-warning .status-dot { background: #f97316; }
+
+  .status-error { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+  .status-error .status-dot { background: #ef4444; }
+
+  .status-inactive { background: rgba(107, 114, 128, 0.1); color: #6b7280; }
+  .status-inactive .status-dot { background: #6b7280; }
+
+  /* Pagination */
+  .pagination-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    background: var(--pico-background-color);
+    border-top: 1px solid var(--pico-muted-border-color);
+    font-size: 0.875rem;
+  }
+
+  .pagination-info {
+    color: var(--pico-muted-color);
+  }
+
+  .pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .pagination-btn {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--pico-muted-border-color);
+    border-radius: 0.375rem;
+    background: var(--pico-card-background-color);
+    color: var(--pico-color);
+    cursor: pointer;
+    font-size: 0.875rem;
+    text-decoration: none;
+  }
+
+  .pagination-btn:hover:not(:disabled) {
+    border-color: var(--pico-primary);
+    color: var(--pico-primary);
+  }
+
+  .pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .pagination-btn.active {
+    background: var(--pico-primary);
+    color: white;
+    border-color: var(--pico-primary);
+  }
+
+  /* Empty State */
+  .empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: var(--pico-muted-color);
+  }
+
+  .refresh-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--pico-primary);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .refresh-btn:hover {
+    background: var(--pico-primary-hover);
+  }
+
+  .clear-btn {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--pico-muted-border-color);
+    border-radius: 0.375rem;
+    background: transparent;
+    color: var(--pico-muted-color);
+    cursor: pointer;
+    font-size: 0.875rem;
+  }
+
+  .clear-btn:hover {
+    border-color: var(--pico-primary);
+    color: var(--pico-primary);
+  }
+</style>
+
+<!-- Breadcrumb -->
+<nav class="breadcrumb">
+  <a href="/">Dashboard</a>
+  <span>/</span>
+  <span>Resources</span>
+</nav>
+
+<!-- Page Header -->
+<div class="page-header">
+  <div>
+    <h2 class="page-title">All Resources</h2>
+    <p class="page-subtitle">View and filter all AWS resources</p>
+  </div>
+  <div style="display: flex; gap: 0.5rem;">
+    <% if (lastUpdated) { %>
+    <span style="font-size: 0.75rem; color: var(--pico-muted-color); align-self: center;">
+      Updated: <%= lastUpdated %>
+    </span>
+    <% } %>
+    <button class="refresh-btn" onclick="refreshResources()">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+        <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+      </svg>
+      Refresh
+    </button>
+  </div>
+</div>
+
+<!-- Stats Bar -->
+<div class="stats-bar">
+  <div class="stat-item">
+    <span class="stat-label">Total Resources</span>
+    <span class="stat-value"><%= totalItems %></span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-label">Showing</span>
+    <span class="stat-value"><%= resources.length %></span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-label">Page</span>
+    <span class="stat-value"><%= currentPage %> / <%= totalPages || 1 %></span>
+  </div>
+</div>
+
+<!-- Filters Bar -->
+<div class="filters-bar">
+  <div class="filter-group">
+    <label>Type:</label>
+    <select id="typeFilter" onchange="applyFilters()">
+      <option value="">All Types</option>
+      <% resourceTypes.forEach(type => { %>
+        <option value="<%= type %>" <%= filters.type === type ? 'selected' : '' %>>
+          <%= resourceTypeLabels[type] || type %>
+        </option>
+      <% }); %>
+    </select>
+  </div>
+
+  <div class="filter-group">
+    <label>Category:</label>
+    <select id="categoryFilter" onchange="applyFilters()">
+      <option value="">All Categories</option>
+      <% Object.entries(resourceCategories).forEach(([key, label]) => { %>
+        <option value="<%= key %>" <%= filters.category === key ? 'selected' : '' %>>
+          <%= label %>
+        </option>
+      <% }); %>
+    </select>
+  </div>
+
+  <div class="filter-group">
+    <label>Project:</label>
+    <select id="projectFilter" onchange="applyFilters()">
+      <option value="">All Projects</option>
+      <% projectNames.forEach(name => { %>
+        <option value="<%= name %>" <%= filters.project === name ? 'selected' : '' %>>
+          <%= name %>
+        </option>
+      <% }); %>
+    </select>
+  </div>
+
+  <div class="filter-group">
+    <label>Search:</label>
+    <input type="search" id="searchFilter" placeholder="Search by name or ID..."
+           value="<%= filters.search %>" onkeyup="handleSearchKeyup(event)">
+  </div>
+
+  <% if (filters.type || filters.category || filters.project || filters.search) { %>
+  <button class="clear-btn" onclick="clearFilters()">Clear Filters</button>
+  <% } %>
+</div>
+
+<!-- Resource Table -->
+<div class="resource-table-container">
+  <% if (resources.length === 0) { %>
+  <div class="empty-state">
+    <p>No resources found matching your criteria</p>
+  </div>
+  <% } else { %>
+  <table class="resource-table">
+    <thead>
+      <tr>
+        <th class="sortable <%= filters.sort === 'name' ? 'sorted' : '' %>" onclick="sortBy('name')">
+          Name
+          <span class="sort-icon"><%= filters.sort === 'name' ? (filters.order === 'asc' ? '▲' : '▼') : '⇅' %></span>
+        </th>
+        <th class="sortable <%= filters.sort === 'project' ? 'sorted' : '' %>" onclick="sortBy('project')">
+          Project
+          <span class="sort-icon"><%= filters.sort === 'project' ? (filters.order === 'asc' ? '▲' : '▼') : '⇅' %></span>
+        </th>
+        <th class="sortable <%= filters.sort === 'type' ? 'sorted' : '' %>" onclick="sortBy('type')">
+          Type
+          <span class="sort-icon"><%= filters.sort === 'type' ? (filters.order === 'asc' ? '▲' : '▼') : '⇅' %></span>
+        </th>
+        <th class="sortable <%= filters.sort === 'state' ? 'sorted' : '' %>" onclick="sortBy('state')">
+          State
+          <span class="sort-icon"><%= filters.sort === 'state' ? (filters.order === 'asc' ? '▲' : '▼') : '⇅' %></span>
+        </th>
+        <th class="sortable <%= filters.sort === 'createdAt' ? 'sorted' : '' %>" onclick="sortBy('createdAt')">
+          Created
+          <span class="sort-icon"><%= filters.sort === 'createdAt' ? (filters.order === 'asc' ? '▲' : '▼') : '⇅' %></span>
+        </th>
+        <th class="sortable <%= filters.sort === 'resourceId' ? 'sorted' : '' %>" onclick="sortBy('resourceId')">
+          Resource ID
+          <span class="sort-icon"><%= filters.sort === 'resourceId' ? (filters.order === 'asc' ? '▲' : '▼') : '⇅' %></span>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <% resources.forEach(resource => { %>
+        <tr>
+          <td>
+            <div class="resource-name" title="<%= resource.name || resource.resourceId %>">
+              <%= resource.name || resource.resourceId %>
+            </div>
+          </td>
+          <td>
+            <span class="resource-project"><%= resource.tags?.Project || '-' %></span>
+          </td>
+          <td>
+            <span class="resource-type"><%= resourceTypeLabels[resource.type] || resource.type %></span>
+          </td>
+          <td>
+            <span class="status-badge <%= helpers.getStatusClass(resource.state) %>">
+              <span class="status-dot"></span>
+              <%= resource.state || 'unknown' %>
+            </span>
+          </td>
+          <td>
+            <span class="resource-date"><%= resource.createdAt ? helpers.formatDate(resource.createdAt) : '-' %></span>
+          </td>
+          <td>
+            <span class="resource-id" title="<%= resource.resourceId %>">
+              <%= resource.resourceId %>
+            </span>
+          </td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+
+  <!-- Pagination -->
+  <div class="pagination-bar">
+    <div class="pagination-info">
+      Showing <%= ((currentPage - 1) * limit) + 1 %> - <%= Math.min(currentPage * limit, totalItems) %> of <%= totalItems %> resources
+    </div>
+    <div class="pagination-controls">
+      <% if (currentPage > 1) { %>
+        <a href="?<%= buildQueryString({ page: currentPage - 1 }) %>" class="pagination-btn">Previous</a>
+      <% } else { %>
+        <button class="pagination-btn" disabled>Previous</button>
+      <% } %>
+
+      <%
+        const maxVisiblePages = 5;
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+        if (endPage - startPage + 1 < maxVisiblePages) {
+          startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+      %>
+
+      <% if (startPage > 1) { %>
+        <a href="?<%= buildQueryString({ page: 1 }) %>" class="pagination-btn">1</a>
+        <% if (startPage > 2) { %>
+          <span style="color: var(--pico-muted-color);">...</span>
+        <% } %>
+      <% } %>
+
+      <% for (let i = startPage; i <= endPage; i++) { %>
+        <a href="?<%= buildQueryString({ page: i }) %>"
+           class="pagination-btn <%= i === currentPage ? 'active' : '' %>">
+          <%= i %>
+        </a>
+      <% } %>
+
+      <% if (endPage < totalPages) { %>
+        <% if (endPage < totalPages - 1) { %>
+          <span style="color: var(--pico-muted-color);">...</span>
+        <% } %>
+        <a href="?<%= buildQueryString({ page: totalPages }) %>" class="pagination-btn"><%= totalPages %></a>
+      <% } %>
+
+      <% if (currentPage < totalPages) { %>
+        <a href="?<%= buildQueryString({ page: currentPage + 1 }) %>" class="pagination-btn">Next</a>
+      <% } else { %>
+        <button class="pagination-btn" disabled>Next</button>
+      <% } %>
+    </div>
+  </div>
+  <% } %>
+</div>
+
+<script>
+function applyFilters() {
+  const type = document.getElementById('typeFilter').value;
+  const category = document.getElementById('categoryFilter').value;
+  const project = document.getElementById('projectFilter').value;
+  const search = document.getElementById('searchFilter').value;
+
+  const params = new URLSearchParams();
+  if (type) params.set('type', type);
+  if (category) params.set('category', category);
+  if (project) params.set('project', project);
+  if (search) params.set('search', search);
+  params.set('sort', '<%= filters.sort %>');
+  params.set('order', '<%= filters.order %>');
+
+  window.location.href = '/resources?' + params.toString();
+}
+
+function handleSearchKeyup(event) {
+  if (event.key === 'Enter') {
+    applyFilters();
+  }
+}
+
+function clearFilters() {
+  window.location.href = '/resources';
+}
+
+function sortBy(column) {
+  const currentSort = '<%= filters.sort %>';
+  const currentOrder = '<%= filters.order %>';
+
+  let newOrder = 'asc';
+  if (column === currentSort && currentOrder === 'asc') {
+    newOrder = 'desc';
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  params.set('sort', column);
+  params.set('order', newOrder);
+  params.set('page', '1');
+
+  window.location.href = '/resources?' + params.toString();
+}
+
+async function refreshResources() {
+  try {
+    await apiFetch('/api/resources/refresh', { method: 'POST' });
+    window.location.reload();
+  } catch (error) {
+    console.error('Failed to refresh:', error);
+  }
+}
+</script>
+
+<%
+function buildQueryString(overrides) {
+  const params = {};
+  if (filters.type) params.type = filters.type;
+  if (filters.category) params.category = filters.category;
+  if (filters.project) params.project = filters.project;
+  if (filters.search) params.search = filters.search;
+  params.sort = filters.sort;
+  params.order = filters.order;
+  params.limit = limit;
+
+  Object.assign(params, overrides);
+
+  return Object.entries(params)
+    .filter(([k, v]) => v)
+    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+    .join('&');
+}
+%>

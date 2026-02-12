@@ -1,0 +1,11 @@
+{
+  "projectName": "aws-resource-monitor",
+  "appEnv": "local",
+  "appMode": "origin",
+  "port": 8001,
+  "logLevel": "debug",
+  "alertEnabled": false,
+  "rateLimitPerMinute": 1000,
+  "k8sBastionInstanceId": "i-0eaab0b86cccfaa47",
+  "k8sEksClusterName": "prod-eks-cluster"
+}
